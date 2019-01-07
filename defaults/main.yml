@@ -1,0 +1,37 @@
+---
+logrotate_service_name: logrotate
+
+# Search files config
+logrotate_search_config_path: "{{ playbook_dir }}/files/groups/{{ item }}/{{ logrotate_service_name }}"
+logrotate_search_config_paths: []
+logrotate_host_config_file_path: "{{ logrotate_host_config_path | default(inventory_hostname) }}/logrotate.conf"
+logrotate_host_config_extra_path: "{{ logrotate_host_config_path | default(inventory_hostname) }}/extra"
+
+# Directories
+logrotate_config_file_path: /etc/logrotate.conf
+logrotate_config_path: /etc/logrotate.d
+logrotate_config_extra_path: "{{ logrotate_config_path }}/extra"
+
+# Application config
+logrotate_apt_denpendencies:
+  - logrotate
+
+logrotate_configs: []
+# Sample config
+#   - name: nginx
+#     paths: 
+#       - /var/log/nginx/*.log
+#     options:
+#       - daily
+#       - missingok
+#       - rotate 52
+#       - compress
+#       - delaycompress
+#       - notifempty
+#       - create 640 nginx adm
+#       - sharedscripts
+#     scripts:
+#       postrotate: |
+#         if [ -f /var/run/nginx.pid ]; then
+#           kill -USR1 `cat /var/run/nginx.pid`
+#         fi

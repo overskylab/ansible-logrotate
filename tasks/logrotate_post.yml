@@ -1,0 +1,60 @@
+---
+- block: # copy config files by generated template
+  - name: Add {{ logrotate_config_extra_path }} directory to include config files
+    lineinfile:
+      path: "{{ logrotate_config_file_path }}"
+      state: present
+      insertafter: '^include \/etc\/logrotate.d'
+      line: "include /etc/logrotate.d/extra"
+    when: not logrotate_config_check.stat.exists
+  
+  - name: Drop logrotate configuration files in {{ logrotate_config_extra_path }}
+    template:
+      src: logrotate.j2
+      dest: "{{ logrotate_config_extra_path }}/{{ item }}"
+      owner: root
+      group: root
+      mode: 0644
+    with_items: "{{ logrotate_configs }}"
+    when:
+      - logrotate_configs is defined and logrotate_configs | length > 0
+      - not logrotate_config_check.stat.exists
+
+
+- block: # copy config files by synchronized
+  - name: Ensure rsync and libsemanage-python is installed (RedHat)
+    when: ansible_os_family == "RedHat"
+    yum: 
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - rsync
+      - libsemanage-python
+    when: logrotate_config_check.stat.exists
+
+  # rsync logrotate configuration except extra directory
+  - name: Copy logrotate configuration file
+    synchronize:
+      src: "{{ logrotate_host_config_path }}/"
+      dest: "{{ logrotate_config_path }}/"
+      delete: yes
+      rsync_opts:
+        - "--exclude=extra"
+    when: logrotate_config_check.stat.exists
+    notify: Check logrotate configuration and reload logrotate
+
+  - name: Copy extra config directory
+    copy:
+      src: "{{ logrotate_config_extra_path }}"
+      dest: "{{ logrotate_config_path }}/"
+    when:
+      - logrotate_config_extra_check.stat.isdir is defined
+      - logrotate_config_extra_check.stat.isdir
+    notify: Check logrotate configuration and reload logrotate
+
+  - name: Enable seboolean to enable logrotate reverse proxy (RedHat)
+    when: ansible_os_family == "RedHat"
+    seboolean:
+      name: httpd_can_network_connect
+      state: yes
+      persistent: yes

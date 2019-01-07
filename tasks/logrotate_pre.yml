@@ -1,0 +1,8 @@
+---
+- name: Ensure {{ logrotate_config_extra_path }} is created
+  file:
+    path: "{{ logrotate_config_extra_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 755

@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  role_name: logrotate
+  author: Teerawat Namsricharoensuk
+  description: Ansible role to install and config logrotate
+  license: MIT
+  min_ansible_version: 2.5
+  platforms:
+  - name: Ubuntu
+    versions:
+    - trusty
+    - xenial
+  galaxy_tags:
+    - airflow
+dependencies: []

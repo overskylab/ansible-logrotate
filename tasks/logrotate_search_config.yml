@@ -1,0 +1,37 @@
+---
+- name: Set list of path to look for local logrotate configuration directory
+  set_fact:
+    logrotate_search_config_paths: "{{ logrotate_search_config_paths }} + [ '{{ logrotate_search_config_path }}' ]"
+  with_items: "{{ group_names }}"
+
+- name: Check if logrotate configuration directory exists
+  stat:
+    path: "{{ item }}"
+  register: logrotate_config_check
+  become: false
+  delegate_to: 127.0.0.1
+  with_first_found:
+    - files: "{{ logrotate_search_config_paths }}"
+      skip: true
+
+- name: Set logrotate configuration directory
+  set_fact:
+    logrotate_host_config_path: "{{ logrotate_config_check.results[0].stat.path }}"
+  when:
+    - logrotate_config_check.results[0] is defined
+    - logrotate_config_check.results[0].stat is defined
+    - logrotate_config_check.results[0].stat.isdir
+
+- name: Check if logrotate template configuration file is exists
+  stat:
+    path: "{{ logrotate_host_config_file_path }}"
+  become: false
+  delegate_to: 127.0.0.1
+  register: logrotate_config_check
+
+- name: Check if logrotate extra directory is exists
+  stat:
+    path: "{{ logrotate_host_config_extra_path }}"
+  become: false
+  delegate_to: 127.0.0.1
+  register: logrotate_config_extra_check

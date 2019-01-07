@@ -1,0 +1,15 @@
+---
+- name: Include OS family specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_os_family }}.yml"
+    - default.yml
+  
+- include_tasks: logrotate_pre.yml
+- include_tasks: logrotate_install.yml
+
+- block: # Config
+  - include_tasks: logrotate_search_config.yml
+  - include_tasks: logrotate_post.yml
+  tags:
+    - logrotate-config

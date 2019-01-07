@@ -1,0 +1,6 @@
+---
+- name: Install APT denpendencies
+  apt:
+    name: "{{ logrotate_apt_denpendencies }}"
+    state: present
+    update_cache: yes
