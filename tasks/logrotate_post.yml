@@ -11,7 +11,7 @@
   - name: Drop logrotate configuration files in {{ logrotate_config_extra_path }}
     template:
       src: logrotate.j2
-      dest: "{{ logrotate_config_extra_path }}/{{ item }}"
+      dest: "{{ logrotate_config_extra_path }}/{{ item.name }}"
       owner: root
       group: root
       mode: 0644
